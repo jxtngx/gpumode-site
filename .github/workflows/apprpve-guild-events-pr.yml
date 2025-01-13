@@ -1,0 +1,72 @@
+name: Auto-approve Guild Events Update
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+jobs:
+  auto-approve:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        
+      - name: Check branch conditions
+        id: check
+        run: |
+          branch="${{ github.head_ref }}"
+          expected="update-events/${{ steps.date.outputs.date }}"
+          if [[ "$branch" == "$expected" ]]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get PR details
+        if: steps.check.outputs.valid == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          title=$(gh pr view ${{ github.event.pull_request.number }} --json title --jq .title)
+          body=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq .body)
+          echo "title=$title" >> $GITHUB_OUTPUT
+          echo "body=$body" >> $GITHUB_OUTPUT
+
+      - name: Wait for Vercel deployment
+        if: steps.check.outputs.valid == 'true'
+        id: wait-for-vercel
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          for i in {1..30}; do
+            status=$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }}/check-runs \
+              --jq '.check_runs[] | select(.name == "Vercel") | .conclusion')
+            
+            if [ "$status" = "success" ]; then
+              echo "Vercel deployment succeeded"
+              exit 0
+            elif [ "$status" = "failure" ]; then
+              echo "Vercel deployment failed"
+              exit 1
+            fi
+            
+            echo "Waiting for Vercel deployment to complete (attempt $i)..."
+            sleep 20
+          done
+          
+          echo "Timeout waiting for Vercel deployment"
+          exit 1
+
+      - name: Approve PR
+        if: steps.check.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [[ "${{ steps.pr.outputs.title }}" == *"Update events for"* ]] && [[ "${{ steps.pr.outputs.body }}" == "Automated PR to update Discord events" ]]; then
+            gh pr review ${{ github.event.pull_request.number }} --approve -b "Auto-approving validated guild events update"
+          fi

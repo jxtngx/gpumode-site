@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Mosaic GPU",
+    "description": "Speaker: Adam Paszke",
+    "scheduled_start_time": "2025-01-25T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Flash Infer",
+    "description": "Speaker: Zihao Ye",
+    "scheduled_start_time": "2025-01-24T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "NVIDIA Profiling",
+    "description": "Speaker: Magnus Strengert",
+    "scheduled_start_time": "2025-02-14T18:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Outperforming CUBLAS on H100",
+    "description": "Speaker: @pranjalssh",
+    "scheduled_start_time": "2025-02-15T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Efficient int8 tensorcore matmul for turing GPU",
+    "description": "Speaker: Erik Schultheis",
+    "scheduled_start_time": "2025-02-08T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Distributed GEMM",
+    "description": "Speaker: Ali Hassani",
+    "scheduled_start_time": "2025-02-22T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Low Bit Metal Kernels",
+    "description": "Speaker: Manuel Candales",
+    "scheduled_start_time": "2025-03-01T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "CUDA, Triton, Flash Attention: a learning journey",
+    "description": "Speaker: Umar Jamil",
+    "scheduled_start_time": "2025-03-08T20:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Consumer GPU performance",
+    "description": "Speaker: Jake Cannell",
+    "scheduled_start_time": "2025-03-15T19:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  },
+  {
+    "name": "Scaling Laws for Low Precision",
+    "description": "Speaker: Tanishq Kumar",
+    "scheduled_start_time": "2025-03-22T19:00:00+00:00",
+    "entity_metadata": {
+      "location": "zoom"
+    }
+  }
+]

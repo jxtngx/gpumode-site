@@ -1,0 +1,76 @@
+name: Update Guild Events
+
+on:
+  schedule:
+    # Runs at 7 AM UTC on every weekday
+    - cron: '0 7 * * 1-5'
+  # Manually trigger the workflow
+  workflow_dispatch:
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    
+    
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          token: ${{ secrets.GH_PAT }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: '18'
+          
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.0.0
+        with:
+          version: 'latest'
+
+      - name: Install dependencies
+        working-directory: ./site
+        run: pnpm install
+        
+      - name: Update JSON file
+        id: update
+        working-directory: ./site/scripts
+        env:
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: |
+          if npx ts-node updateGuildEvents.tsx; then
+            echo "Changes detected"
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected"
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Create new branch
+        if: steps.update.outputs.changes == 'true'
+        run: git checkout -b update-events/${{ steps.date.outputs.date }}
+          
+      - name: Commit changes
+        if: steps.update.outputs.changes == 'true'
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+          git add ./site/app/public/future_events.json
+          git commit -m "Update data for ${{ steps.date.outputs.date }}"
+          git push https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git HEAD:update-events/${{ steps.date.outputs.date }}
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr create \
+            --title "Update events for ${{ steps.date.outputs.date }}" \
+            --body "Automated PR to update Discord events" \
+            --base main \
+            --head update-events/${{ steps.date.outputs.date }} \
+            --reviewer ${{ github.actor }}
